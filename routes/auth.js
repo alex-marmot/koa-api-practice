@@ -17,13 +17,6 @@ const auth = new Router(
     prefix: '/auth'
   });
 
-auth.get('/login', async (ctx, next) => {
-    ctx.body = {
-        "status" : "login page"
-    }   
-})
-
-
 auth.post('/login', async (ctx, next) => {
     let middleware = passport.authenticate('local', {
         session: false
@@ -53,17 +46,7 @@ auth.post('/register', async (ctx, next) => {
     const username = ctx.request.body.username;
     const email = ctx.request.body.email;
     const password = ctx.request.body.password;
-    User.findOne({ username: username }, function (err, existingUser) {
-        if (err) {  next(err) }
-
-        // If user is not unique, return error
-        if (existingUser) {
-            ctx.body = {
-                'error': '用户名已被注册'
-            }
-        }
-
-        // If username is unique and password was provided, create account
+    User.findOne({ username: username }).then(function () {
         const user = new User({
             email: email,
             username: username,
@@ -71,12 +54,14 @@ auth.post('/register', async (ctx, next) => {
         });
 
         user.save()
-        .then(function () {
-            console.log('saved')
+            .then(function () {
+                console.log('saved')
+            }, function (err) {
+                console.log('Ops Somethng went wrong when save user.')
+            });
         }, function (err) {
-            // want to handle errors here
-        });
-    });
+            console.log('Ops Somethng went wrong.')
+        });;
 })
 
 
